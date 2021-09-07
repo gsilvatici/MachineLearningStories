@@ -2,7 +2,6 @@ import math
 import numpy as np
 import operator
 import pandas as pd
-import matplotlib.pyplot as plt
 
 
 class Category:
@@ -10,8 +9,10 @@ class Category:
     def __init__(self, name):
         self.name = name
         self.headline_count = 0
+        self.probability = 0
         self.words = {}
         self.relative_frequencies = {}
+        self.probability_of_no_data = 0
 
     def add_words_from_headline(self, headline):
         
@@ -27,21 +28,45 @@ class Category:
 	        self.words[key] = self.words.get(key) + keys.count(key)  
 
 
-    def learn(self):
+    def learn(self, total_headlines):
 	    # probability of each word
+	    k = len(self.words.keys())
+	    total = sum(self.words.values())
+	    self.probability = self.headline_count / total_headlines
+	    self.probability_of_no_data = 1 / (total + k)
+
 	    for word, cardinal in self.words.items():
-	    	self.relative_frequencies[word] = (cardinal + 1) / (sum(self.words.values()) + 1)
+	    	self.relative_frequencies[word] = (cardinal + 1) / (total + k)
+
+
+    def get_productorial(self, headline):
+        words = headline.lower().split()
+
+        prod = 1
+
+        for word in words:
+            prod = prod * self.probability_of_no_data if word not in self.relative_frequencies.keys() \
+                else self.relative_frequencies.get(word)
+
+        # for word in words:
+        # 	if word not in self.relative_frequencies.keys():
+        # 		prod = prod * self.probability_of_no_data
+        # 	else:
+        # 		prod = prod * self.relative_frequencies.get(word)
+
+        return prod * self.probability
 
 
 class Bayes:
 
     def __init__(self, df):
         self.categories = {}
+        self.confusion_matrix = {}
+
         for headline, category in zip(df['titular'], df['categoria']):
 	        if category not in self.categories.keys():
 	            self.categories[category] = Category(category)
 	        self.categories[category].add_words_from_headline(headline)
-
 
     def learn(self, total_headlines):
     	for category in self.categories.values():
@@ -49,7 +74,26 @@ class Bayes:
     	print("Bayes learning finished.")
 
 
-def split_dataframe(df, percentage = 0.8):
+    def classify(self, testing_data):
+
+        self.confusion_matrix = {
+            category: {category: 0 for category in self.categories.keys()}
+            for category in self.categories.keys()
+        }
+
+        for i in range(len(testing_data)):
+            row = testing_data.iloc[i]
+            headline = row.titular
+            category = row.categoria
+
+            productorial = {name: category.get_productorial(headline) for name, category in self.categories.items()}
+            
+            winner = max(productorial.items(), key = operator.itemgetter(1))[0]
+
+            self.confusion_matrix[category][winner] += 1
+
+
+def split_dataframe(df, percentage):
 
     msk = np.random.rand(len(df)) < percentage
     training_data = df[msk]
@@ -62,7 +106,7 @@ news_data = pd.read_excel('Noticias_argentinas.xlsx')
 
 news_data = news_data.loc[news_data['categoria'].notnull()]
 
-categories = [
+categories_filter = [
     'Salud',
     'Deportes',
     'Economia',
@@ -71,15 +115,17 @@ categories = [
     'Nacional',
     'Internacional'
 ]
-print(len(news_data.index))
 
-
-news_data = news_data.loc[news_data['categoria'].isin(categories)]
+news_data = news_data.loc[news_data['categoria'].isin(categories_filter)]
 
 print(len(news_data.index))
 
-training_data, test = split_dataframe(news_data, percentage=0.99)
+training_data, testing_data = split_dataframe(news_data, percentage = 0.99)
 
 bayes = Bayes(training_data)
 
-bayes.learn()
+bayes.learn(len(news_data.index))
+
+bayes.classify(testing_data)
+
+# print(bayes.confusion_matrix)
