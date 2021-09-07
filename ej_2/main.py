@@ -10,8 +10,8 @@ class Category:
     def __init__(self, name):
         self.name = name
         self.headline_count = 0
-        self.probability = 0.0
         self.words = {}
+        self.relative_frequencies = {}
 
     def add_words_from_headline(self, headline):
         
@@ -26,12 +26,12 @@ class Category:
 	            self.words[key] = 0
 	        self.words[key] = self.words.get(key) + keys.count(key)  
 
-    def learn(self, total_headlines):
-	    # probability of the category
-	    self.probability = self.headline_count / total_headlines
 
-	    # relative frequencies for the words that appeared
-	    #TO DO
+    def learn(self):
+	    # probability of each word
+	    for word, cardinal in self.words.items():
+	    	self.relative_frequencies[word] = (cardinal + 1) / (sum(self.words.values()) + 1)
+
 
 class Bayes:
 
@@ -42,7 +42,7 @@ class Bayes:
 	            self.categories[category] = Category(category)
 	        self.categories[category].add_words_from_headline(headline)
 
-			
+
     def learn(self, total_headlines):
     	for category in self.categories.values():
     		category.learn(total_headlines)
@@ -71,10 +71,15 @@ categories = [
     'Nacional',
     'Internacional'
 ]
+print(len(news_data.index))
+
+
 news_data = news_data.loc[news_data['categoria'].isin(categories)]
+
+print(len(news_data.index))
 
 training_data, test = split_dataframe(news_data, percentage=0.99)
 
 bayes = Bayes(training_data)
 
-# bayes.learn()
+bayes.learn()
