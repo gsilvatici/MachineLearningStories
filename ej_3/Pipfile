@@ -11,6 +11,7 @@ pandas = "*"
 matplotlib = "*"
 nbconvert = "*"
 pyppeteer = "*"
+openpyxl = "*"
 
 [dev-packages]
 
