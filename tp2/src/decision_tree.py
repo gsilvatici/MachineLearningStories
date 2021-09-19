@@ -5,7 +5,7 @@ import uuid
 
 class DecisionTree:
 
-    def __init__(self, training_set, config):
+    def __init__(self, training_set, config, simplify=False):
         GAIN_FUNCTION = {"shannon": shannon, "gini": gini}
         self.gain_function = GAIN_FUNCTION[config["gain_function"].lower()]
 
@@ -13,18 +13,23 @@ class DecisionTree:
             raise Exception("Invalid gain function")
         self.training_set = training_set
         self.objective = config["objective"]
-        self.tree = self.__generate_subtree(training_set, parent=None)
+        self._tree = self.__generate_subtree(training_set, parent=None)
 
-    def print(self):
-        dot = Digraph()
-        self.__add_node_rec(dot, self.tree)
-        print(dot.source)
+        if simplify:
+            print("WARNING: simplified option is still pretty much untested... Might produce bad trees")
+            self.__simplify_rec(self.tree)
+
+    @property
+    def tree(self):
+        return self._tree
+
 
     def digraph(self):
         dot = Digraph()
         self.__add_node_rec(dot, self.tree)
         return dot
 
+    # For graphing only :)
     def __add_node_rec(self, dot, node, parent=None):
         name = node.value
         dot.node(node.id, name)
@@ -33,6 +38,46 @@ class DecisionTree:
 
         for child in node.children:
             self.__add_node_rec(dot, child, node)
+
+    def __simplify_rec(self, node):
+        if node.is_leaf:
+            return
+
+        new_children = []
+        new_children_set = set()
+        for child in node.children:
+            branches = self.__branches(child)
+            if branches not in new_children_set:
+                new_children_set.add(branches)
+                new_children.append(child)
+
+        # can't simplify, go deeper
+        if set(node.children) == set(new_children) or len(set(new_children)) > 1:
+            for child in node.children:
+                self.__simplify_rec(child)
+
+        # this means all children have the same subtree as their children
+        else:
+            parent = node.parent
+            # remove current node
+            parent.children.remove(node)
+            # replace current node with children of children
+            parent.children.extend(new_children[0].children)
+                
+
+
+    def __branches(self, node):
+        branches_list = []
+        self.__branches_rec(branches_list, f"{self.tree.value}", node)
+        return tuple(branches_list)
+
+    def __branches_rec(self, branches_list, branch, node):
+        if node.is_leaf:
+            branches_list.append(branch)
+        else:
+            for child in node.children:
+                branch = f"{branch};{child.value}"
+                self.__branches_rec(branches_list, branch, child)
 
     def __generate_subtree(self, data, parent):
         classes = list(data.keys())
@@ -105,6 +150,14 @@ class Node:
         self.children = []
         self.id = str(uuid.uuid4())
 
+    def __eq__(self, other):
+        if type(self) == type(other):
+            return self.id == other.id
+        return False
+    
+    def __hash__(self):
+        return hash(self.id)
+        
     @property
     def is_leaf(self):
         return len(self.children) == 0
