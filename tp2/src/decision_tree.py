@@ -4,7 +4,6 @@ import uuid
 
 
 class DecisionTree:
-
     def __init__(self, training_set, config, simplify=False):
         GAIN_FUNCTION = {"shannon": shannon, "gini": gini}
         self.gain_function = GAIN_FUNCTION[config["gain_function"].lower()]
@@ -16,13 +15,14 @@ class DecisionTree:
         self._tree = self.__generate_subtree(training_set, parent=None)
 
         if simplify:
-            print("WARNING: simplified option is still pretty much untested... Might produce bad trees")
+            print(
+                "WARNING: simplified option is still pretty much untested... Might produce bad trees"
+            )
             self.__simplify_rec(self.tree)
 
     @property
     def tree(self):
         return self._tree
-
 
     def digraph(self):
         dot = Digraph()
@@ -63,8 +63,6 @@ class DecisionTree:
             parent.children.remove(node)
             # replace current node with children of children
             parent.children.extend(new_children[0].children)
-                
-
 
     def __branches(self, node):
         branches_list = []
@@ -154,10 +152,10 @@ class Node:
         if type(self) == type(other):
             return self.id == other.id
         return False
-    
+
     def __hash__(self):
         return hash(self.id)
-        
+
     @property
     def is_leaf(self):
         return len(self.children) == 0
