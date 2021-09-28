@@ -12,6 +12,7 @@ matplotlib = "*"
 graphviz = "*"
 openpyxl = "*"
 sklearn = "*"
+sns = "*"
 
 [dev-packages]
 

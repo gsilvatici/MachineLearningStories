@@ -7,6 +7,8 @@ class DecisionTree:
     def __init__(self, training_set, config, simplify=False):
         GAIN_FUNCTION = {"shannon": shannon, "gini": gini}
         self.gain_function = GAIN_FUNCTION[config["gain_function"].lower()]
+        self.max_depth = config.get('max_depth', float('inf'))
+        self.depth = 0
 
         if not self.gain_function:
             raise Exception("Invalid gain function")
@@ -77,7 +79,7 @@ class DecisionTree:
                 branch = f"{branch};{child.value}"
                 self.__branches_rec(branches_list, branch, child)
 
-    def __generate_subtree(self, data, parent):
+    def __generate_subtree(self, data, parent, depth=0):
         classes = list(data.keys())
         objective = self.objective
 
@@ -86,7 +88,7 @@ class DecisionTree:
             return Node(data[objective].unique()[0], parent)
 
         # Case (3) attributes are empty
-        if len(classes) == 1:
+        if len(classes) == 1 or depth == self.max_depth:
             return Node(str(data[objective].mode()[0]), parent)
 
         # remove objective class from classes so that only attributes remain
@@ -98,6 +100,7 @@ class DecisionTree:
         # Choose attribute that maximizes Gain
         _, max_attr = max(gains_tuple)
         node = Node(max_attr, parent)
+        depth += 1
         children = []
 
         # for each posible value in the winner attribute
@@ -106,7 +109,7 @@ class DecisionTree:
             edge = Node(str(value), node)
             children.append(edge)
             new_data = data[data[max_attr] == value].drop(max_attr, axis=1)
-            edge.children.append(self.__generate_subtree(new_data, parent=edge))
+            edge.children.append(self.__generate_subtree(new_data, parent=edge, depth=depth))
 
         node.children = children
         return node
