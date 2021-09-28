@@ -26,6 +26,12 @@ class DecisionTree:
     def tree(self):
         return self._tree
 
+    def predict(self, input_set):
+        results = []
+        for item in input_set:
+            results.append(self.tree.predict(item))
+        return results
+
     def digraph(self):
         dot = Digraph()
         self.__add_node_rec(dot, self.tree)
@@ -158,6 +164,19 @@ class Node:
 
     def __hash__(self):
         return hash(self.id)
+
+    def predict(self, item, no_info_value=0):
+        if self.is_leaf:
+            return self.value
+
+        attributes = item.keys()
+
+        for attribute in attributes:
+            if self.value == attribute:
+                for child in self.children:
+                    if child.value == item[attribute]:
+                        return child.children[0].predict(item)
+        return no_info_value
 
     @property
     def is_leaf(self):
