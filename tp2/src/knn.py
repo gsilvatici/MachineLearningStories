@@ -1,25 +1,54 @@
-from collections import Counter
+import math
 
 import numpy as np
-
-
-def distance(x1, x2):
-    return np.sqrt(np.sum((x1 - x2) ** 2))
-
+from src.aux_functions import euclidean_distance_from
 
 class KNN:
-    def __init__(self, labeled_set, k=3):
-        """
-        labeled_set is a list of tuples (point, class)
-        """
+
+    def __init__(self, train_data, train_labels, classes, k=5):
         self.k = k
-        self.labeled_set = labeled_set
+        self.train_data = train_data
+        self.train_labels = train_labels
+        self.classes = classes
 
-    def predict(self, X):
-        return np.array([self._predict(x) for x in X])
+    def classify(self, register):
+        distances = list(map(euclidean_distance_from(register), self.train_data))
 
-    def _predict(self, x):
-        distances = [(distance(x, x_i), v) for x_i, v in self.labeled_set]
-        k_neighbors = sorted(distances)[: self.k]
-        most_common = Counter([value for _, value in k_neighbors]).most_common(1)
-        return most_common[0][0]
+        distances_tuples = list(zip(distances, self.train_labels))
+
+        distances_tuples.sort()
+        knn = distances_tuples[:self.k]
+
+        # Si el registro me dio distancia 0 es que es esta clase la que debe clasificar
+        if knn[0][0] == 0.0:
+            return knn[0][1]
+
+        results = np.zeros(len(self.classes))
+        for (distance, class_number) in knn: 
+            results[class_number - 1] += self.weight(distance)
+
+        max_value = np.max(results)
+        winner = np.where(results == max_value)[0]
+
+        if len(winner) == 1 or self.k == len(self.train_data):
+            return winner[0] + 1
+        # else:
+        #     self.step_k(register)
+
+    @staticmethod
+    def weight(distance):
+        return 1
+
+    def batch_classify(self, batch):
+        return list(map(self.classify, batch))
+
+class WeightedKNN(KNN):
+
+    @staticmethod
+    def weight(distance):
+        return 1/(distance ** 2) if distance != 0 else math.inf
+
+
+# def step_k(self, register):
+#     knn = self.__class__(self.train_data, self.train_labels, self.classes, k = k + 1)
+#     return knn.classify(register)

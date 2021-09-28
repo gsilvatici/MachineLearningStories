@@ -1,4 +1,4 @@
-Review Title;Review Text;wordcount;titleSentiment;textSentiment;Star Rating;sentimentValue
+Review Title;reviewText;wordcount;titleSentiment;textSentiment;starRating;sentimentValue
 Sin conexión;Hola desde hace algo más de un mes me pone sin conexión y no sale nada, antes me funcionaba correctamente.;23;negative;negative;1;-0.4863892549767946
 faltan cosas;Han mejorado la apariencia pero no;20;negative;negative;1;-0.5861874727339228
 Es muy buena lo recomiendo;Andres e puto amoooo;4;;negative;1;-0.6022402747857277
