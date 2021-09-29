@@ -40,7 +40,7 @@ class DecisionTree:
     # For graphing only :)
     def __add_node_rec(self, dot, node, parent=None):
         name = node.value
-        dot.node(node.id, name)
+        dot.node(node.id, str(name))
         if parent is not None:
             dot.edge(parent.id, node.id)
 
@@ -165,17 +165,23 @@ class Node:
     def __hash__(self):
         return hash(self.id)
 
-    def predict(self, item, no_info_value=0):
+    def predict(self, item, no_info_value=0, debug=False):
         if self.is_leaf:
             return self.value
 
         attributes = item.keys()
+        # print(f"current node: {self.value}")
+        # print(f"attributes: {attributes}")
 
         for attribute in attributes:
             if self.value == attribute:
                 for child in self.children:
-                    if child.value == item[attribute]:
+                    # print(f"childval: {child.value}; itemval: {item[attribute]}")
+                    # print(f"childtype: {type(child.value)}; itemtype: {type(item[attribute])}")
+                    if child.value == str(item[attribute]):
                         return child.children[0].predict(item)
+        if debug:
+            print(f"Couldn't find attribute for item:\n {item}")
         return no_info_value
 
     @property

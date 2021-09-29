@@ -13,6 +13,7 @@ graphviz = "*"
 openpyxl = "*"
 sklearn = "*"
 sns = "*"
+seaborn = "*"
 
 [dev-packages]
 

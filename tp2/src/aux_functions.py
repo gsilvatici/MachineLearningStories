@@ -9,9 +9,19 @@ results_dir = './results'
 
 
 def confusion_matrix(predictions, f_X, classes):
+    """
+    2x2 matrix
+    Columns: predicted positive and predicted negative
+    Rows: actual positive and negative
+
+    |----------| positive | negative |
+    | positive |    TP    |    FN    |
+    | negative |    FP    |    TN    |
+
+    """
     conf_matrix = np.zeros((len(classes), len(classes)))
     for prediction, truth in zip(predictions, f_X):
-        conf_matrix[int(truth - 1)][int(prediction - 1)] += 1
+        conf_matrix[int(truth) - 1][int(prediction) - 1] += 1
 
     return conf_matrix
 
