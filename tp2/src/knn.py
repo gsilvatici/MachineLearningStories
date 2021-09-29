@@ -30,10 +30,15 @@ class KNN:
         max_value = np.max(results)
         winner = np.where(results == max_value)[0]
 
-        if len(winner) == 1 or self.k == len(self.train_data):
-            return winner[0] + 1
-        # else:
-        #     self.step_k(register)
+
+        return winner[0]+1  if len(winner) == 1 or self.k == len(self.train_data) else self.__step_k(register)
+
+    def __step_k(self, register):
+        knn = KNN(self.train_data, self.train_labels, self.classes, k=(self.k + 1))
+        aux = knn.classify(register)
+        # print('aux: ' + str(aux) )
+        if aux is not None: 
+            return aux
 
     @staticmethod
     def weight(distance):
@@ -47,8 +52,3 @@ class WeightedKNN(KNN):
     @staticmethod
     def weight(distance):
         return 1/(distance ** 2) if distance != 0 else math.inf
-
-
-# def step_k(self, register):
-#     knn = self.__class__(self.train_data, self.train_labels, self.classes, k = k + 1)
-#     return knn.classify(register)
