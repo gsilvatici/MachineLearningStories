@@ -8,12 +8,12 @@ class DecisionTree:
         GAIN_FUNCTION = {"shannon": shannon, "gini": gini}
         self.gain_function = GAIN_FUNCTION[config["gain_function"].lower()]
         self.max_depth = config.get('max_depth', float('inf'))
-        self.depth = 0
 
         if not self.gain_function:
             raise Exception("Invalid gain function")
         self.training_set = training_set
         self.objective = config["objective"]
+        self.most_likely = int(training_set[self.objective].mode())
         self._tree = self.__generate_subtree(training_set, parent=None)
 
         if simplify:
@@ -26,10 +26,12 @@ class DecisionTree:
     def tree(self):
         return self._tree
 
-    def predict(self, input_set):
+    def predict(self, input_set, debug=False, no_info_value=None):
         results = []
+        if no_info_value is None:
+            no_info_value = self.most_likely
         for item in input_set:
-            results.append(self.tree.predict(item))
+            results.append(self.tree.predict(item, debug, no_info_value=no_info_value))
         return results
 
     def digraph(self):
@@ -165,7 +167,7 @@ class Node:
     def __hash__(self):
         return hash(self.id)
 
-    def predict(self, item, no_info_value=0, debug=False):
+    def predict(self, item, debug, no_info_value):
         if self.is_leaf:
             return self.value
 
@@ -179,7 +181,7 @@ class Node:
                     # print(f"childval: {child.value}; itemval: {item[attribute]}")
                     # print(f"childtype: {type(child.value)}; itemtype: {type(item[attribute])}")
                     if child.value == str(item[attribute]):
-                        return child.children[0].predict(item)
+                        return child.children[0].predict(item, debug, no_info_value)
         if debug:
             print(f"Couldn't find attribute for item:\n {item}")
         return no_info_value
