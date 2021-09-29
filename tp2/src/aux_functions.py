@@ -7,11 +7,10 @@ from sklearn import preprocessing
 
 results_dir = './results'
 
-
 def confusion_matrix(predictions, f_X, classes):
     conf_matrix = np.zeros((len(classes), len(classes)))
     for prediction, truth in zip(predictions, f_X):
-        conf_matrix[int(int(truth) - 1)][int(int(prediction) - 1)] += 1
+        conf_matrix[int(truth - 1)][int(prediction - 1)] += 1
 
     return conf_matrix
 
@@ -25,6 +24,24 @@ def plot_matrix(matrix, filename):
 
     plt.xlabel("Estimacion")
     plt.ylabel("Esperado")
+    plt.savefig(f'{filename}', bbox_inches='tight')
+    plt.close()
+
+def plot_precision(precisions_knn, precisions_weight_knn, k, filename):
+
+    plt.title(f'Precisión con KNN pesado y k={k}')
+    plt.ylabel('Precisión')
+    plt.xlabel('Iteración')
+
+    points = np.arange(len(precisions_weight_knn))
+    width = 0.8
+
+    plt.bar(points, precisions_weight_knn, width, color='blue')
+
+    plt.xticks(points)
+    plt.legend(loc='lower left')
+
+    plt.show()
     plt.savefig(f'{filename}', bbox_inches='tight')
     plt.close()
 
@@ -45,3 +62,4 @@ def euclidean_distance_from(x1):
             distance += (x1[i] - x2[i]) ** 2
         return math.sqrt(distance)
     return euclidean_distance
+
