@@ -10,7 +10,7 @@ results_dir = './results'
 def confusion_matrix(predictions, f_X, classes):
     conf_matrix = np.zeros((len(classes), len(classes)))
     for prediction, truth in zip(predictions, f_X):
-        conf_matrix[int(truth - 1)][int(prediction - 1)] += 1
+        conf_matrix[int(int(truth) - 1)][int(int(prediction) - 1)] += 1
 
     return conf_matrix
 
