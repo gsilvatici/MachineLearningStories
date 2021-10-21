@@ -22,13 +22,40 @@ f_X = np.append(np.append(grass_predictions, cow_predictions, axis=0), sky_predi
 
 X_train, X_test, f_X_train, f_X_test = train_test_split(X, f_X, test_size=0.2, random_state=42)
 
-print('something')
 
-now = datetime.now()
+# from src.svm_utils import svm_get_precision 
 
-svm_classify_image('./images/cow.jpg', X_train, f_X_train)
+# def validate_c_values():
+#     out_file = open('c_precision.csv', 'a')
+    
+#     out_file.write('kernel,c value,train precision,test precision\n')
+    
+#     for c in range(1, 4, 1):
+#         train_precision, test_precision = svm_get_precision(X_train, f_X_train, X_test, f_X_test, c)
+#         new_line = f'linear,{c},{train_precision},{test_precision}\n'
+#         out_file.write(new_line)
+#         print(new_line)
 
+#     out_file.close()
+    
+# def iterate_kernels():
+#     kernels = ['linear', 'poly', 'rbf']
 
-later = datetime.now()
+#     out_file = open('kernel_precision.csv', 'a')
 
-print(later - now)
+#     for k in kernels:    
+#         train_precision, test_precision = svm_get_precision(X_train, f_X_train, X_test, f_X_test, c=1.0, kernel=k)  
+#         new_line = f'{k},1,{train_precision},{test_precision}\n'
+#         out_file.write(f'{k},1,{train_precision},{test_precision}\n')
+#         print(new_line)
+
+#     out_file.close()
+    
+    
+# now = datetime.now()
+
+# validate_c_values()
+        
+# later = datetime.now()
+    
+# print(later - now)

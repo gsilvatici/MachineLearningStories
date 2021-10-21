@@ -60,23 +60,29 @@ def plot_matrix(matrix, filename):
 
 
 def svm_get_precision(X_train, f_X_train, X_test, f_X_test, c, kernel='linear'):
+    print('before fit')
     svm_classifier = svm.SVC(C=c, kernel=kernel)
     svm_classifier.fit(X_train, f_X_train)
-
+    print('after fit')
+    
     train_predicted = svm_classifier.predict(X_train)
+    
     test_predicted = svm_classifier.predict(X_test)
 
     train_confusion_matrix = confusion_matrix(train_predicted, f_X_train)
+    
     test_confusion_matrix = confusion_matrix(test_predicted, f_X_test)
     
     plot_matrix(train_confusion_matrix, f'train_kernel_{kernel}_c_{c}.png')
+    
     plot_matrix(test_confusion_matrix, f'test_kernel_{kernel}_c_{c}.png')
     
     train_precision = get_precision(train_confusion_matrix)
+    
     test_precision = get_precision(test_confusion_matrix)
 
     return train_precision, test_precision
-
+    # return test_precision
 
 def class_color(class_name):
     if class_name == GRASS:
