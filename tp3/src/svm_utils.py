@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from PIL import Image
 from sklearn import svm
+import math
 
 GRASS = 0
 COW = 1
@@ -59,30 +60,21 @@ def plot_matrix(matrix, filename):
     plt.close()
 
 
-def svm_get_precision(X_train, f_X_train, X_test, f_X_test, c, kernel='linear'):
+def svm_get_precision(X_train, f_X_train, X_test, f_X_test, c, kernel='linear', gamma='0.01'):
     print('before fit')
     svm_classifier = svm.SVC(C=c, kernel=kernel)
     svm_classifier.fit(X_train, f_X_train)
     print('after fit')
     
-    train_predicted = svm_classifier.predict(X_train)
-    
     test_predicted = svm_classifier.predict(X_test)
 
-    train_confusion_matrix = confusion_matrix(train_predicted, f_X_train)
-    
     test_confusion_matrix = confusion_matrix(test_predicted, f_X_test)
     
-    plot_matrix(train_confusion_matrix, f'train_kernel_{kernel}_c_{c}.png')
-    
-    plot_matrix(test_confusion_matrix, f'test_kernel_{kernel}_c_{c}.png')
-    
-    train_precision = get_precision(train_confusion_matrix)
+    plot_matrix(test_confusion_matrix, f'test_kernel_{kernel}_c_{c}_g_{gamma}.png')
     
     test_precision = get_precision(test_confusion_matrix)
 
-    return train_precision, test_precision
-    # return test_precision
+    return test_precision
 
 def class_color(class_name):
     if class_name == GRASS:
@@ -91,3 +83,105 @@ def class_color(class_name):
         return (179, 104, 0)
     if class_name == SKY:
         return (0, 204, 255)
+
+def plot_radial_results():
+
+    # format of data is c_value, kernel=linear, test_precision, train_precision
+    data = np.genfromtxt('radial_precision.csv', delimiter=',')
+
+    gamma_values = []
+    precisions = []
+    for d in data:
+        precisions.append(float(d[2]))
+        gamma_values.append(float(d[0]))
+    # plt.legend()
+
+    # plt.legend()
+
+    points = np.arange(len(precisions))
+    width = 0.8
+
+    low = min(precisions)
+    high = max(precisions)
+    plt.ylim([0.94, 1.0])
+    plt.bar(points, precisions, width, label='gammas', color='blue')
+
+    plt.title("Precisión vs. Gamma en kernel radial")
+    plt.xlabel("Gamma")
+    plt.ylabel("Precisión")
+    # plt.legend()
+
+    # plt.ytick(ticks=np.arange)
+    
+    plt.xticks(ticks=np.arange(len(gamma_values)), labels=gamma_values)
+
+    plt.savefig("radial_precisions.png")
+    plt.close()
+
+
+def plot_kernel_results():
+
+
+    # format of data is c_value, kernel=linear, test_precision, train_precision
+    data = np.genfromtxt('kernel_precision.csv', delimiter=',')
+    # kernels = ['linear', 'polinomial', 'radial', 'sigmoide']
+    kernels = ['linear', 'polinomial', 'radial']
+    precisions = []
+    for d in data:
+        precisions.append(float(d[2]))
+
+    # plt.legend()
+
+    points = np.arange(len(precisions))
+    width = 0.8
+
+    low = min(precisions)
+    high = max(precisions)
+    plt.ylim([0.98, 1.0])
+    plt.bar(points, precisions, width, label='kernels', color='blue')
+
+    plt.title("Precisión vs. Kernel")
+    plt.xlabel("Kernel")
+    plt.ylabel("Precisión")
+    # plt.legend()
+
+    # plt.ytick(ticks=np.arange)
+    
+    plt.xticks(ticks=np.arange(len(kernels)), labels=kernels)
+
+    plt.savefig("kernel_precisions.png")
+    plt.close()
+
+
+
+def plot_c_results():
+    # format of data is c_value, kernel=linear, test_precision, train_precision
+    data = np.genfromtxt('c_precision_old.csv', delimiter=',')
+    # kernels = ['linear', 'polinomial', 'radial', 'sigmoide']
+    c_values = []
+    precisions = []
+    for d in data:
+        precisions.append(float(d[3]))
+        c_values.append(float(d[1]))
+    # plt.legend()
+
+    points = np.arange(len(precisions))
+    width = 0.8
+
+    # low = min(precisions)
+    # high = max(precisions)
+    plt.ylim([0.98, 1.0])
+    plt.bar(points, precisions, width, label='valores c', color='blue')
+
+    plt.title("Precisión vs. C")
+    plt.xlabel("Valor C")
+    plt.ylabel("Precisión")
+    # plt.legend()
+
+    # plt.ytick(ticks=np.arange)
+    
+    plt.xticks(ticks=np.arange(len(c_values)), labels=c_values)
+
+    plt.savefig("c_precisions.png")
+    plt.close()
+
