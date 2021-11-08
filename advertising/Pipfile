@@ -11,6 +11,8 @@ jupyter = "*"
 notebook = "*"
 numpy = "*"
 sklearn = "*"
+statsmodels = "*"
+scipy = "*"
 
 [dev-packages]
 
